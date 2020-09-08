@@ -16,24 +16,32 @@ fontObj =  pg.font.SysFont("areial black", 58)
 numCx, numCy = 30, 30
 dimX = 600 // numCx
 dimY = size[1] // numCy
-matriz = np.loadtxt('nivel1.out')
-playerx, playery = 14, 0
+nivel = ['nivel1.out', 'nivel2.out', 'nivel3.out']
+numNivel = 1
+matriz = np.loadtxt(nivel[numNivel])
+metaNivel = [(16, 29),(15,29), (0,0)]
+inicioNivel = [14,0,0,0,5,5]
+playerx, playery = inicioNivel[numNivel], inicioNivel[numNivel+1]
 matriz[playerx, playery] = 4
+matriz[playerx, playery+1] = 1
 move = 10
-
+avatarx, avatary = 29, 0
 #BUCLE EN EJECUCION
 pg.display.flip()
 game_over = False
 edit = False
 opcion = 0
+
 while not game_over:
     time.sleep(0.02)
     screen.fill((150,200,200))
     
     if move == 0:
+        print("PERDISTE :(")
         game_over = True
     ##GRAVEDAD
     try:
+        ###GRAVEDAD JUGADOR
         if matriz[playerx,playery+1] == 0:
             matriz[playerx, playery] = 0
             playery+=1
@@ -51,7 +59,20 @@ while not game_over:
             playery+=1
             matriz[playerx,playery] = 4 
     except:
-        game_over = True
+        matriz[playerx, playery] = 0
+        numNivel+=1
+        try:
+            matriz = np.loadtxt(nivel[numNivel])
+        except:
+            print("GANASTE!!!")
+            game_over=True
+        playerx, playery = inicioNivel[numNivel], inicioNivel[numNivel+1]
+        matriz[playerx, playery] = 4
+        if numNivel>0:
+            avatarx, avatary = 29, 0
+            matriz[avatarx, avatary] = 7
+        move = 20
+
     #BOTONES
     ## BOTONES PARA EDITAR
     press = False
@@ -59,8 +80,9 @@ while not game_over:
         edit= True
         bg = (100, 200, 150)
     elif opcion == 'r':
-        playerx, playery = 14, 0
+        playerx, playery = inicioNivel[numNivel], inicioNivel[numNivel+1]
         matriz[playerx,playery]=4
+        move = 10
         edit = False
         bg = (200, 200, 200)
     for event in pg.event.get():
@@ -76,10 +98,12 @@ while not game_over:
                         playerx+=1
                         matriz[playerx, playery] = 4
                         move-=1
+                    
                     if matriz[playerx+1, playery]==5:
-                        matriz[playerx, playery] = 0
+                        mmatriz[playerx, playery] = 0
                         playerx+=1
-                        matriz[playerx, playery] = 4
+                        matriz[playerx, playery] =4
+                    
                     if matriz[playerx+1, playery]==6:
                         matriz[playerx, playery] = 0
                         playerx+=1
@@ -92,17 +116,20 @@ while not game_over:
                         playerx-=1
                         matriz[playerx, playery] = 4
                         move-=1
+                    
                     if matriz[playerx-1, playery]==5:
                         matriz[playerx, playery] = 0
                         playerx-=1
+                        avatarx-=1
                         matriz[playerx, playery] = 4
+                    
                     if matriz[playerx+1, playery]==6:
                         matriz[playerx, playery] = 0
                         playerx-=1
                         matriz[playerx, playery] = 4
                         move+=3
-
             ##TERMINA MOVIMIENTO DE JUGADOR
+
         if event.type == pg.MOUSEBUTTONDOWN and edit:
             if event.button == 1:
                 press = True
@@ -116,7 +143,7 @@ while not game_over:
         except: 
             print("Error")
         matriz[playerx, playery] = 0
-        np.savetxt('nivel1.out', matriz, fmt = "%f")
+        np.savetxt(nivel[numNivel], matriz, fmt = "%f")
         press = False
     ##TERMINA BOTONES PARA EDITAR
     
@@ -161,6 +188,8 @@ while not game_over:
                 pg.draw.polygon(screen, (0,0,0), celda, 1)
                 pg.draw.polygon(screen, (0,0,0), diaDe, 0)
             if matriz[x, y] == 4:
+                pg.draw.polygon(screen, bg, celda, 0)
+                pg.draw.polygon(screen, (0,0,0), celda, 1)
                 pg.draw.circle(screen, (0,0,250), circle, 10, 0)
             if matriz[x, y] == 5:
                 pg.draw.polygon(screen, bg, celda, 0)
@@ -170,6 +199,10 @@ while not game_over:
                 pg.draw.polygon(screen, bg, celda, 0)
                 pg.draw.polygon(screen, (0,0,0), celda, 1)
                 pg.draw.ellipse(screen, (250,250, 100), nube, 0)
+            if matriz[x, y] == 7:
+                pg.draw.polygon(screen, bg, celda, 0)
+                pg.draw.polygon(screen, (0,0,0), celda, 1)
+                pg.draw.circle(screen, (0,0,250), circle, 10, 1)
     
     ##MENSAJES E INSTRUCCIONES
     numMove = myFont.render(str(move), 1, (50, 80, 80))
