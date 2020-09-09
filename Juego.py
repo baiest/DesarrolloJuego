@@ -18,10 +18,10 @@ numCx, numCy = 30, 30
 dimX = 600 // numCx
 dimY = size[1] // numCy
 nivel = ['nivel1.out', 'nivel2.out', 'nivel3.out']
-numNivel = 2
+numNivel = 0
 matriz = np.loadtxt(nivel[numNivel])
 metaNivel = [(16, 29),(14,29), (16,0)]
-playerx, playery = 0, 0
+playerx, playery = 14, 0
 avatarx, avatary = 29, 0
 ava2x, ava2y = 15, 0
 matriz[playerx, playery] = 4
@@ -37,10 +37,11 @@ opcion = 0
 cambio = 20
 flag = True
 while not game_over:
-    pos = [(playerx, playery), (avatarx, avatary), (ava2x, ava2y)]
+    pos = [(playerx, playery), (avatarx, avatary)]
     
     flag = True
-    if cambio > 0 and numNivel >= 1:
+    if cambio > 0 and numNivel > 1:
+        pos.append((ava2x, ava2y))
         print(pos)
         random.shuffle(pos)
         playerx, playery = pos[0][0], pos[0][1]
@@ -50,6 +51,14 @@ while not game_over:
         matriz[pos[1]] = 7
         matriz[pos[2]] = 7
         cambio-=1
+    elif cambio > 0 and numNivel >= 1:
+        random.shuffle(pos)
+        playerx, playery = pos[0][0], pos[0][1]
+        avatarx, avatary = pos[1][0], pos[1][1]
+        matriz[pos[0]] = 4
+        matriz[pos[1]] = 7
+        cambio-=1
+
     time.sleep(0.02)
     screen.fill((150,200,200))
     
@@ -204,35 +213,56 @@ while not game_over:
                             if flag:
                                 move-=1
                                 flag = False
-                            if matriz[avatarx+1, avatary]==0:
+                            if matriz[avatarx+1, avatary]== 0 or matriz[avatarx+1, avatary] == 5 or matriz[avatarx+1, avatary] == 6:
                                 matriz[avatarx, avatary] = 0
                                 avatarx+=1
+
+                                if matriz[avatarx, avatary]==5:
+                                    move+=1
+                            
+                                if matriz[avatarx, avatary]==6:
+                                    move+=3
+
                                 matriz[avatarx, avatary] = 7
 
                         if key == 'left' and avatarx > 0:
                             if flag: 
                                 move-=1
                                 flag = False
-                            if matriz[avatarx-1, avatary]==0:
-                                    matriz[avatarx, avatary] = 0
-                                    avatarx-=1
-                                    matriz[avatarx, avatary] = 7
+                            if matriz[avatarx-1, avatary]==0 or matriz[avatarx-1, avatary] == 5 or matriz[avatarx-1, avatary] == 6:
+                                matriz[avatarx, avatary] = 0
+                                avatarx-=1
+                                    
+                                if matriz[avatarx, avatary]==5:
+                                    move+=1
+                            
+                                if matriz[avatarx, avatary]==6:
+                                    move+=3
+                                matriz[avatarx, avatary] = 7
+            
             if numNivel > 1 and ava2y < 29:
                 if matriz[ava2x, ava2y+1] == 1 and not edit:
                         if key == 'right' and ava2x+1 < numCx:
                             if flag:
                                 move-=1
                                 flag = False
-                            if matriz[ava2x+1, ava2y]==0:
+                            if matriz[ava2x+1, ava2y]==0 or matriz[ava2x-1, ava2y] == 5 or matriz[ava2x-1, ava2y] == 6:
                                 matriz[ava2x, ava2y] = 0
                                 ava2x+=1
+
+                                if matriz[ava2x, ava2y]==5:
+                                    move+=1
+                            
+                                if matriz[ava2x, ava2y]==6:
+                                    move+=3
+
                                 matriz[ava2x, ava2y] = 7
 
                         if key == 'left' and ava2x > 0:
                             if flag: 
                                 move-=1
                                 flag = False
-                            if matriz[ava2x-1, ava2y]==0:
+                            if matriz[ava2x-1, ava2y]==0 or matriz[ava2x-1, ava2y] == 5 or matriz[ava2x-1, ava2y] == 6:
                                     matriz[ava2x, ava2y] = 0
                                     ava2x-=1
                                     matriz[ava2x, ava2y] = 7
