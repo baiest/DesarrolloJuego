@@ -1,6 +1,7 @@
 import pygame as pg
 import numpy as np
 import time
+import random
 
 ##PANTALLA
 pg.init()
@@ -17,26 +18,42 @@ numCx, numCy = 30, 30
 dimX = 600 // numCx
 dimY = size[1] // numCy
 nivel = ['nivel1.out', 'nivel2.out', 'nivel3.out']
-numNivel = 1
+numNivel = 2
 matriz = np.loadtxt(nivel[numNivel])
-metaNivel = [(16, 29),(15,29), (0,0)]
-inicioNivel = [14,0,0,0,5,5]
-playerx, playery = inicioNivel[numNivel], inicioNivel[numNivel+1]
+metaNivel = [(16, 29),(14,29), (16,0)]
+playerx, playery = 0, 0
+avatarx, avatary = 29, 0
+ava2x, ava2y = 15, 0
 matriz[playerx, playery] = 4
 matriz[playerx, playery+1] = 1
 move = 10
-avatarx, avatary = 29, 0
+#avatarx, avatary = 29, 0
+
 #BUCLE EN EJECUCION
 pg.display.flip()
 game_over = False
 edit = False
 opcion = 0
-
+cambio = 20
+flag = True
 while not game_over:
+    pos = [(playerx, playery), (avatarx, avatary), (ava2x, ava2y)]
+    
+    flag = True
+    if cambio > 0 and numNivel >= 1:
+        print(pos)
+        random.shuffle(pos)
+        playerx, playery = pos[0][0], pos[0][1]
+        avatarx, avatary = pos[1][0], pos[1][1]
+        ava2x, ava2y = pos[2][0], pos[2][1]
+        matriz[pos[0]] = 4
+        matriz[pos[1]] = 7
+        matriz[pos[2]] = 7
+        cambio-=1
     time.sleep(0.02)
     screen.fill((150,200,200))
     
-    if move == 0:
+    if move < 0:
         print("PERDISTE :(")
         game_over = True
     ##GRAVEDAD
@@ -52,35 +69,85 @@ while not game_over:
             playerx+=1
             playery+=1
             matriz[playerx,playery] = 4 
-        
+         
         if matriz[playerx, playery+1] == 2:
             matriz[playerx, playery] = 0
             playerx-=1
             playery+=1
             matriz[playerx,playery] = 4 
+        
+        if numNivel > 0:
+            try:
+                if matriz[avatarx,avatary+1] == 0:
+                    matriz[avatarx, avatary] = 0
+                    avatary+=1
+                    matriz[avatarx, avatary] = 7
+            except:
+                print("Avatar no se mueve")
+            
+            if matriz[avatarx,avatary+1] == 2:
+                matriz[avatarx, avatary] = 0
+                avatarx-=1
+                avatary+=1
+                matriz[avatarx, avatary] = 7
+
+            if matriz[avatarx,avatary+1] == 3:
+                matriz[avatarx, avatary] = 0
+                avatarx+=1
+                avatary+=1
+                matriz[avatarx, avatary] = 7
+        if numNivel > 1:
+            try:
+                if matriz[ava2x,ava2y+1] == 0:
+                    matriz[ava2x, ava2y] = 0
+                    ava2y+=1
+                    matriz[ava2x, ava2y] = 7
+            except:
+                print("Avatar no se mueve")
+            
+            if matriz[ava2x,ava2y+1] == 2:
+                matriz[ava2x, ava2y] = 0
+                ava2x-=1
+                ava2y+=1
+                matriz[ava2x, ava2y] = 7
+
+            if matriz[ava2x,ava2y+1] == 3:
+                matriz[ava2x, ava2y] = 0
+                ava2x+=1
+                ava2y+=1
+                matriz[ava2x, ava2y] = 7
     except:
-        matriz[playerx, playery] = 0
-        numNivel+=1
-        try:
-            matriz = np.loadtxt(nivel[numNivel])
-        except:
-            print("GANASTE!!!")
-            game_over=True
-        playerx, playery = inicioNivel[numNivel], inicioNivel[numNivel+1]
-        matriz[playerx, playery] = 4
-        if numNivel>0:
-            avatarx, avatary = 29, 0
-            matriz[avatarx, avatary] = 7
-        move = 20
+        if matriz[metaNivel[numNivel]]== 4:
+            matriz[playerx, playery] = 0
+            numNivel+=1
+            try:
+                matriz = np.loadtxt(nivel[numNivel])
+            except:
+                print("GANASTE!!!")
+                game_over=True
+            if numNivel==1:
+                playerx, playery = 0, 0
+                matriz[playerx, playery] = 4
+                avatarx, avatary = 29, 0
+                matriz[avatarx, avatary] = 7
+            if numNivel==2:
+                playerx, playery = 0, 0
+                matriz[playerx, playery] = 7
+                avatarx, avatary = 29, 0
+                matriz[avatarx, avatary] = 7
+                ava2x, ava2y = 16, 0
+                matriz[ava2x, ava2y] = 7
+            move = 10
+    ##TERMINA GRAVEDAD
 
     #BOTONES
     ## BOTONES PARA EDITAR
     press = False
     if opcion == 'e':
         edit= True
+        matriz[playerx, playery] = 0
         bg = (100, 200, 150)
     elif opcion == 'r':
-        playerx, playery = inicioNivel[numNivel], inicioNivel[numNivel+1]
         matriz[playerx,playery]=4
         move = 10
         edit = False
@@ -93,42 +160,83 @@ while not game_over:
             key = pg.key.name(event.key)
             if matriz[playerx, playery+1] == 1 and not edit:
                 if key == 'right' and playerx+1 < numCx:
-                    if matriz[playerx+1, playery]==0:
-                        matriz[playerx, playery] = 0
-                        playerx+=1
-                        matriz[playerx, playery] = 4
+                    if flag:
                         move-=1
-                    
-                    if matriz[playerx+1, playery]==5:
-                        mmatriz[playerx, playery] = 0
-                        playerx+=1
-                        matriz[playerx, playery] =4
-                    
-                    if matriz[playerx+1, playery]==6:
+                        if move%2==0:
+                            cambio = 20
+                        flag =False
+
+                    if matriz[playerx+1, playery]== 0 or matriz[playerx+1, playery] == 5 or matriz[playerx+1, playery]== 6:
                         matriz[playerx, playery] = 0
                         playerx+=1
+                    
+                        if matriz[playerx, playery]==5:
+                            move+=1
+                    
+                        if matriz[playerx, playery]==6:
+                            move+=3
+
                         matriz[playerx, playery] = 4
-                        move+=3
                 
                 if key == 'left' and playerx > 0:
-                    if matriz[playerx-1, playery]==0:
-                        matriz[playerx, playery] = 0
-                        playerx-=1
-                        matriz[playerx, playery] = 4
+                    if flag:
                         move-=1
-                    
-                    if matriz[playerx-1, playery]==5:
+                        if move%2==0:
+                            cambio = 20
+                        flag = False
+                    if matriz[playerx-1, playery]== 0 or matriz[playerx-1, playery] == 5 or matriz[playerx-1, playery] == 6:
                         matriz[playerx, playery] = 0
                         playerx-=1
-                        avatarx-=1
+
+                        if matriz[playerx, playery]==5:
+                            move+=1
+                    
+                        if matriz[playerx, playery]==6:
+                            move+=3
+                        
                         matriz[playerx, playery] = 4
                     
-                    if matriz[playerx+1, playery]==6:
-                        matriz[playerx, playery] = 0
-                        playerx-=1
-                        matriz[playerx, playery] = 4
-                        move+=3
             ##TERMINA MOVIMIENTO DE JUGADOR
+            ##MOVIMIENTO AVATAR
+            if numNivel > 0 and avatary < 29:
+                if matriz[avatarx, avatary+1] == 1 and not edit:
+                        if key == 'right' and avatarx+1 < numCx:
+                            if flag:
+                                move-=1
+                                flag = False
+                            if matriz[avatarx+1, avatary]==0:
+                                matriz[avatarx, avatary] = 0
+                                avatarx+=1
+                                matriz[avatarx, avatary] = 7
+
+                        if key == 'left' and avatarx > 0:
+                            if flag: 
+                                move-=1
+                                flag = False
+                            if matriz[avatarx-1, avatary]==0:
+                                    matriz[avatarx, avatary] = 0
+                                    avatarx-=1
+                                    matriz[avatarx, avatary] = 7
+            if numNivel > 1 and ava2y < 29:
+                if matriz[ava2x, ava2y+1] == 1 and not edit:
+                        if key == 'right' and ava2x+1 < numCx:
+                            if flag:
+                                move-=1
+                                flag = False
+                            if matriz[ava2x+1, ava2y]==0:
+                                matriz[ava2x, ava2y] = 0
+                                ava2x+=1
+                                matriz[ava2x, ava2y] = 7
+
+                        if key == 'left' and ava2x > 0:
+                            if flag: 
+                                move-=1
+                                flag = False
+                            if matriz[ava2x-1, ava2y]==0:
+                                    matriz[ava2x, ava2y] = 0
+                                    ava2x-=1
+                                    matriz[ava2x, ava2y] = 7
+            ##TERMINA OVIMIENTO AVATAR
 
         if event.type == pg.MOUSEBUTTONDOWN and edit:
             if event.button == 1:
