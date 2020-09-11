@@ -20,7 +20,7 @@ dimY = size[1] // numCy
 nivel = ['nivel1.out', 'nivel2.out', 'nivel3.out']
 numNivel = 0
 matriz = np.loadtxt(nivel[numNivel])
-metaNivel = [(16, 29),(14,29), (16,0)]
+metaNivel = [(16, 29),(14,29), (15,29)]
 playerx, playery = 14, 0
 avatarx, avatary = 29, 0
 ava2x, ava2y = 15, 0
@@ -38,11 +38,10 @@ cambio = 20
 flag = True
 while not game_over:
     pos = [(playerx, playery), (avatarx, avatary)]
-    
+    ##JUGADOR AL AZAR
     flag = True
     if cambio > 0 and numNivel > 1:
         pos.append((ava2x, ava2y))
-        print(pos)
         random.shuffle(pos)
         playerx, playery = pos[0][0], pos[0][1]
         avatarx, avatary = pos[1][0], pos[1][1]
@@ -58,7 +57,7 @@ while not game_over:
         matriz[pos[0]] = 4
         matriz[pos[1]] = 7
         cambio-=1
-
+    ##TERMINA JUGADOR AL AZAR
     time.sleep(0.02)
     screen.fill((150,200,200))
     
@@ -92,6 +91,8 @@ while not game_over:
                     avatary+=1
                     matriz[avatarx, avatary] = 7
             except:
+                matriz[avatarx, avatary] = 0
+                avatarx, avatary = 0, 0
                 print("Avatar no se mueve")
             
             if matriz[avatarx,avatary+1] == 2:
@@ -112,6 +113,8 @@ while not game_over:
                     ava2y+=1
                     matriz[ava2x, ava2y] = 7
             except:
+                matriz[ava2x, ava2y] = 0
+                ava2x, ava2y = 0, 0
                 print("Avatar no se mueve")
             
             if matriz[ava2x,ava2y+1] == 2:
@@ -141,10 +144,10 @@ while not game_over:
                 matriz[avatarx, avatary] = 7
             if numNivel==2:
                 playerx, playery = 0, 0
-                matriz[playerx, playery] = 7
+                matriz[playerx, playery] = 4
                 avatarx, avatary = 29, 0
                 matriz[avatarx, avatary] = 7
-                ava2x, ava2y = 16, 0
+                ava2x, ava2y = 15, 0
                 matriz[ava2x, ava2y] = 7
             move = 10
     ##TERMINA GRAVEDAD
@@ -153,14 +156,30 @@ while not game_over:
     ## BOTONES PARA EDITAR
     press = False
     if opcion == 'e':
+        print("Modo edicion")
         edit= True
         matriz[playerx, playery] = 0
         bg = (100, 200, 150)
+        opcion = "null"
     elif opcion == 'r':
+        print("cerrado modo edicion")
         matriz[playerx,playery]=4
         move = 10
         edit = False
         bg = (200, 200, 200)
+        opcion = "null"
+    if opcion == '1':
+        print("Piso")
+    if opcion == '2':
+        print("deslizar izq")
+    if opcion == '3':
+        print("Deslizar derecha")
+    if opcion == '5':
+        print("Corazon")
+    if opcion == '6':
+        print("nube")
+    if opcion== '0':
+        print("Borrar")
     for event in pg.event.get():
         if event.type == pg.KEYDOWN:
             opcion = event.unicode
@@ -168,11 +187,11 @@ while not game_over:
             ##MOVIMIENTO JUGADOR
             key = pg.key.name(event.key)
             if matriz[playerx, playery+1] == 1 and not edit:
+                if move%2==0:
+                    cambio = 20
                 if key == 'right' and playerx+1 < numCx:
                     if flag:
                         move-=1
-                        if move%2==0:
-                            cambio = 20
                         flag =False
 
                     if matriz[playerx+1, playery]== 0 or matriz[playerx+1, playery] == 5 or matriz[playerx+1, playery]== 6:
@@ -190,8 +209,6 @@ while not game_over:
                 if key == 'left' and playerx > 0:
                     if flag:
                         move-=1
-                        if move%2==0:
-                            cambio = 20
                         flag = False
                     if matriz[playerx-1, playery]== 0 or matriz[playerx-1, playery] == 5 or matriz[playerx-1, playery] == 6:
                         matriz[playerx, playery] = 0
